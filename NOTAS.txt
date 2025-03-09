@@ -1,0 +1,6 @@
+HOST:
+
+127.0.0.1 josemvegar.com
+127.0.0.1 dotdevsolutions.com
+127.0.0.1 admin.dotdevsolutions.com
+127.0.0.1 admin.josemvegar.com

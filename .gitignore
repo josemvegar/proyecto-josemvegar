@@ -1,0 +1,10 @@
+.env
+admin-empresa/.env
+admin-personal/.env
+backend/.env
+frontend-empresa/.env
+frontend-personal.env
+admin-empresa/.next/
+admin-personal/.next/
+frontend-empresa/.next/
+frontend-personal/.next/

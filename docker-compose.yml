@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - my-network
+
+  frontend-empresa:
+    build:
+      context: ./frontend-empresa
+    ports:
+      - "3002:4000"
+    volumes:
+      - ./frontend-empresa:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - my-network
+
+  frontend-personal:
+    build:
+      context: ./frontend-personal
+    ports:
+      - "3003:5000"
+    volumes:
+      - ./frontend-personal:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - my-network
+
+  admin-empresa:
+    build:
+      context: ./admin-empresa
+    ports:
+      - "3004:6500"
+    volumes:
+      - ./admin-empresa:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - my-network
+
+  admin-personal:
+    build:
+      context: ./admin-personal
+    ports:
+      - "3005:7000"
+    volumes:
+      - ./admin-personal:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - my-network
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend-empresa
+      - frontend-personal
+      - admin-empresa
+      - admin-personal
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
