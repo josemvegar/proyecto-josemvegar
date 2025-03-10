@@ -8,3 +8,7 @@ admin-empresa/.next/
 admin-personal/.next/
 frontend-empresa/.next/
 frontend-personal/.next/
+admin-empresa/.next/*
+admin-personal/.next/*
+frontend-empresa/.next/*
+frontend-personal/.next/*
