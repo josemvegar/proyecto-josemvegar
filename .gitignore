@@ -1,9 +1,12 @@
+# Ignore .env files
 .env
 admin-empresa/.env
 admin-personal/.env
 backend/.env
 frontend-empresa/.env
-frontend-personal.env
+frontend-personal/.env
+
+# Ignore .next directories
 admin-empresa/.next/
 admin-personal/.next/
 frontend-empresa/.next/
