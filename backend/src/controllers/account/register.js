@@ -2,15 +2,27 @@ const express = require("express");
 const mongoose = require("mongoose");
 const User = require("../../models/Users");
 const emptyChecker = require("../../helpers/emptyChecker");
+const {dataValidator} = require("../../helpers/dataValidator");
 
 const register = async (req, res) => {
     const data = req.body;
-    let empty= emptyChecker(data, ["name", "nick", "email", "password", "role", "page"])
+
+    let empty= emptyChecker(data, ["name", "nick", "email", "password", "role", "page"]);
     if ( empty != true){
-        return res.status(404).send({
+        return res.status(400).send({
             status: "error",
             message: "Faltan datos.",
             empty
+        });
+    }
+
+    let validation = dataValidator(data);
+
+    if(dataValidator != true){
+        return res.status(400).send({
+            status: "error",
+            message: "Validación no pasada.",
+            reasons: validation
         });
     }
 
@@ -28,7 +40,7 @@ const register = async (req, res) => {
         }).exec();
     
         if(userExist.length > 0){
-            return res.status(400).send({
+            return res.status(409).send({
                 status: "error",
                 message: "El usuario ya existe.",
             });
