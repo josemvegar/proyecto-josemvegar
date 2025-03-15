@@ -1,12 +1,10 @@
-const emptyChecker = (data, fields=[]) => {
-
+const emptyChecker = (data, fields = []) => {
     const missingFields = fields.filter(field => !data.hasOwnProperty(field));
-
     if (missingFields.length > 0) {
-        console.log("Faltan los siguientes campos:", missingFields);
-        return missingFields;
+      return missingFields.map(field => `Falta el campo: ${field}`);
     }
     return true;
-}
-
-module.exports= emptyChecker;
+  };
+  
+  module.exports = emptyChecker;
+  
