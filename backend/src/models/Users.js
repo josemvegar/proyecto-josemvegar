@@ -20,4 +20,11 @@ userSchema.statics.findByEmailOrNick = function (email, nick, page) {
   }).exec();
 };
 
+userSchema.statics.findUserToLogin = function (login, page) {
+  return this.find({$and: [
+    {$or: [{email: login}, {nick: login}]},
+    {page}
+  ]}).select("+password +role").exec();
+}
+
 module.exports = model("User", userSchema, "users");

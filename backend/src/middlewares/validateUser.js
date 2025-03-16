@@ -24,4 +24,20 @@ const validateUser = (req, res, next) => {
   next();
 };
 
-module.exports = validateUser;
+const loginValidator = (req, res, next) => {
+  const data = req.body;
+  const empty = emptyChecker(data, ["login","password", "page"]);
+  if (empty !== true) {
+    return res.status(400).send({
+      status: "error",
+      message: "Faltan datos.",
+      empty
+    });
+  }
+  next();
+};
+
+module.exports = {
+  validateUser,
+  loginValidator
+};
