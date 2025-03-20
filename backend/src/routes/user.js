@@ -8,7 +8,8 @@ const express = require("express");
 const loginController = require("../controllers/account/login");
 const registerController = require("../controllers/account/register");
 const validateUser = require('../middlewares/validateUser');
-const check = require("../middlewares/auth");
+const auth  = require("../middlewares/auth");
+//router.get('/admin-only', auth(['role_admin']), adminController.action);
 
 const router = express.Router();
 

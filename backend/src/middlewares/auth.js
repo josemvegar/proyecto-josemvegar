@@ -1,48 +1,42 @@
-// Importar dependencias
-const jwt = require("jwt-simple");
-const moment = require("moment");
+const jwt = require('jwt-simple');
+const moment = require('moment');
+const { SECRET } = require('../helpers/jwt');
 
-// Importar clave secreta
-const { SECRET } = require("../helpers/jwt");
+const auth = (roles = []) => (req, res, next) => {
+  if (!req.headers.token) {
+    return res.status(403).send({
+      status: 'error',
+      message: 'La petición no tiene la cabecera de autenticación.',
+    });
+  }
 
-// Crear middleware
-const authAdmin = (req, res, next) => {
-    // Comprobar si llega la cabecera de autenticación
-    if(!req.headers.token){
-        return res.status(403).send({
-            status: "error",
-            message: "La petición no tiene la cabecera de autenticación."
-        });
+  let token = req.headers.token.replace(/['"]+/g, '');
+
+  try {
+    const payload = jwt.decode(token, SECRET);
+
+    if (payload.exp <= moment().unix()) {
+      return res.status(401).send({
+        status: 'error',
+        message: 'Token expirado.',
+      });
     }
 
-    // Limpiar token
-    let token = req.headers.token.replace(/['"]+/g, "");  
-
-    try{
-        // Decodificar el token
-        let payload = jwt.decode(token, SECRET);
-
-        // Comprobar la expiración del token
-        if(payload.exp <= moment().unix()){
-            return res.status(401).send({
-                status: "error",
-                message: "Token expirado."
-            });
-        }
-
-        // Agregar datos del usuario a la request
-        req.user = payload;
-
-    }catch(error){
-        return res.status(400).send({
-            status: "error",
-            message: "Token inválido."
-        });
+    if (roles.length && !roles.includes(payload.role)) {
+      return res.status(403).send({
+        status: 'error',
+        message: 'No tienes permisos para realizar esta acción.',
+      });
     }
-    // Pasar a la ejecución de la acción.
+
+    req.user = payload;
     next();
+  } catch (error) {
+    return res.status(400).send({
+      status: 'error',
+      message: 'Token inválido.',
+    });
+  }
 };
 
-module.exports = {
-    authAdmin
-}
+module.exports = auth;

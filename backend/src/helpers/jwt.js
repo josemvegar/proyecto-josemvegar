@@ -1,32 +1,34 @@
-// Importar dependencias
-const jwt = require("jwt-simple");
-const moment = require("moment");
-
-// Definir clave secreta
+const jwt = require('jwt-simple');
+const moment = require('moment');
 const dotenv = require('dotenv');
+
 dotenv.config();
 const SECRET = process.env.JWT_SECRET;
 
-// Función para generar tokens
 const createToken = (user) => {
-    const payload = {
-        id: user._id,
-        name: user.name,
-        surname: user.surname,
-        nick: user.nick,
-        email: user.email,
-        role: user.role,
-        image: user.image,
-        iat: moment().unix(),
-        exp: moment().add(30, "days").unix()
-    }
+  const payload = {
+    id: user._id,
+    name: user.name,
+    surname: user.surname,
+    nick: user.nick,
+    email: user.email,
+    role: user.role,
+    image: user.image,
+    iat: moment().unix(),
+    exp: moment().add(30, 'days').unix(),
+  };
 
-    return jwt.encode(payload, SECRET);
-
+  return jwt.encode(payload, SECRET);
 };
 
-// Exportar módulo
+const renewToken = (token) => {
+  const payload = jwt.decode(token, SECRET);
+  payload.exp = moment().add(30, 'days').unix();
+  return jwt.encode(payload, SECRET);
+};
+
 module.exports = {
-    SECRET,
-    createToken
+  SECRET,
+  createToken,
+  renewToken,
 };

@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new Schema({
   name: { type: String, required: true },
@@ -26,5 +27,9 @@ userSchema.statics.findUserToLogin = function (login, page) {
     {page}
   ]}).select("+password +role").exec();
 }
+
+userSchema.methods.comparePassword = function (password) {
+  return bcrypt.compareSync(password, this.password);
+};
 
 module.exports = model("User", userSchema, "users");
