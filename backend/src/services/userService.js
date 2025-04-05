@@ -18,6 +18,7 @@ const bcrypt = require('bcrypt');
 
 // Importa el módulo de JWT para crear tokens de autenticación.
 const jwt = require('../helpers/jwt');
+const { use } = require('../routes/user');
 
 class UserService {
   /**
@@ -165,6 +166,52 @@ class UserService {
       response: { user: userResponse, token }
     };
   }
+
+  static async update(id, user, data) {
+
+    if((id !== user.id) && (user.role !== "role_admin")){
+      return this._createErrorResponse("error", 403, "No puedes editar los datos de otro usuario si no eres administrador.");
+    }
+
+    // Busca al usuario en la base de datos.
+    const userExist = await User.findUserDuplicated(id, data.email, data.nick, user.page);
+    if (userExist.length) {
+      return this._createErrorResponse("error", 404, "Los datos ingresados pertenecen a otro usuario.");
+    }
+
+    // Valida el formato de los datos.
+    const validation = dataValidator(data);
+    if (validation !== true) {
+      return this._createErrorResponse("error", 400, "Validación no pasada.", validation);
+    }
+
+    if(data.password){
+      // Encripta la contraseña antes de guardarla en la base de datos.
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.password = hashedPassword;
+    }
+
+    const userToEdit = await User.findByIdAndUpdate(id, data, {new: true});
+
+    if (!userToEdit){
+      return this._createErrorResponse("error", 500, "Error al editar usuario.");
+    }
+
+    // Genera un token de autenticación.
+    const token = jwt.updateUser(user, data);
+
+    // Elimina la contraseña y el rol del objeto de respuesta.
+    const userResponse = userToEdit.toObject();
+    delete userResponse.password;
+    delete userResponse.role;
+
+    // Devuelve una respuesta exitosa con el usuario y el token.
+    return {
+      status: "success",
+      response: { user: userResponse, token }
+    };
+  }
+
 }
 
 // Exporta la clase UserService para que pueda ser utilizada en otros archivos.

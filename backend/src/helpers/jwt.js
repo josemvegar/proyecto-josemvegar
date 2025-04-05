@@ -56,8 +56,9 @@ const createToken = (user) => {
     email: user.email,
     role: user.role,
     image: user.image,
-    iat: moment().unix(), // Fecha de emisión (en segundos).
-    exp: moment().add(30, 'days').unix(), // Fecha de expiración (en 30 días).
+    page: user.page,
+    iat: user.iat ? user.iat : moment().unix(), // Fecha de emisión (en segundos).
+    exp: user.exp ? user.exp : moment().add(30, 'days').unix(), // Fecha de expiración (en 30 días).
   };
 
   // Codifica el payload en un token JWT utilizando la clave secreta.
@@ -87,9 +88,20 @@ const renewToken = (token) => {
   return jwt.encode(payload, SECRET);
 };
 
+const updateUser= (user, data) => {
+  for (let key in data) {
+      if (user.hasOwnProperty(key)) {
+          user[key] = data[key];
+      }
+  }
+  return createToken(user);
+}
+
+
 // Exporta la clave secreta y las funciones para crear y renovar tokens.
 module.exports = {
   SECRET,
   createToken,
   renewToken,
+  updateUser
 };

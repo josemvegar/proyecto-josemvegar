@@ -13,6 +13,9 @@ const loginController = require("../controllers/account/login");
 // Importa el controlador de registro para manejar las solicitudes de registro de usuarios.
 const registerController = require("../controllers/account/register");
 
+// Importa el controlador de editar para manejar las solicitudes de edición de usuarios.
+const editController = require("../controllers/account/update");
+
 // Importa el middleware de validación para verificar los datos de entrada.
 const validateUser = require('../middlewares/validateUser');
 
@@ -39,6 +42,15 @@ router.post("/register", validateUser.validateUser, registerController.register)
  * @param {Object} res - Objeto de respuesta HTTP.
  */
 router.post("/login", validateUser.loginValidator, loginController.login);
+
+/**
+ * Ruta para iniciar sesión.
+ * @name put/edit
+ * @function
+ * @param {Object} req - Objeto de solicitud HTTP.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ */
+router.put("/update/:id?", auth(['role_admin', 'role_client']), editController.update);
 
 // Exporta el enrutador para que pueda ser utilizado en otros archivos.
 module.exports = router;

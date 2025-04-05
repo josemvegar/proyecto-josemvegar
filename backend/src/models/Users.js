@@ -93,5 +93,19 @@ userSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
+userSchema.statics.findUserDuplicated = function (id, email = '', nick = '', page) {
+  const orConditions = [];
+  if (email) orConditions.push({ email });
+  if (nick) orConditions.push({ nick });
+
+  return this.find({
+    $and: [
+      { _id: { $ne: id } },
+      { $or: orConditions },
+      { page }
+    ],
+  }).exec();
+};
+
 // Exporta el modelo de usuario para que pueda ser utilizado en otros archivos.
 module.exports = model("User", userSchema, "users");

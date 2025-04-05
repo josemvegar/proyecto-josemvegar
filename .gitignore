@@ -15,3 +15,6 @@ admin-empresa/.next/*
 admin-personal/.next/*
 frontend-empresa/.next/*
 frontend-personal/.next/*
+
+# Ignore node_modules
+backend/node_modules/
