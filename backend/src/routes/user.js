@@ -14,7 +14,10 @@ const loginController = require("../controllers/account/login");
 const registerController = require("../controllers/account/register");
 
 // Importa el controlador de editar para manejar las solicitudes de edición de usuarios.
-const editController = require("../controllers/account/update");
+const editController = require("../controllers/user/update");
+
+// Importa el controlador de eliminar para manejar las solicitudes de eliminar usuarios.
+const deleteController = require("../controllers/user/delete");
 
 // Importa el middleware de validación para verificar los datos de entrada.
 const validateUser = require('../middlewares/validateUser');
@@ -51,6 +54,15 @@ router.post("/login", validateUser.loginValidator, loginController.login);
  * @param {Object} res - Objeto de respuesta HTTP.
  */
 router.put("/update/:id?", auth(['role_admin', 'role_client']), editController.update);
+
+/**
+ * Ruta para iniciar sesión.
+ * @name delete/delete
+ * @function
+ * @param {Object} req - Objeto de solicitud HTTP.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ */
+router.delete("/delete/:id", auth(['role_admin']), deleteController._delete);
 
 // Exporta el enrutador para que pueda ser utilizado en otros archivos.
 module.exports = router;

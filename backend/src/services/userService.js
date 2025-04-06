@@ -212,6 +212,31 @@ class UserService {
     };
   }
 
+  static async _delete(id, userLoggued) {
+
+    if(id === userLoggued.id){
+      return this._createErrorResponse("error", 403, "No puedes eliminar tu propia cuenta.");
+    }
+
+    // Busca al usuario en la base de datos.
+    const userExist = await User.findIdPerPage(id, userLoggued.page);
+    if (!userExist.length) {
+      return this._createErrorResponse("error", 404, "El id de usuario igresado no existe.");
+    }
+
+    const userToDelete = await User.findOneAndDelete({_id: id});
+
+    if (!userToDelete){
+      return this._createErrorResponse("error", 500, "Error al editar usuario.");
+    }
+
+    // Devuelve una respuesta exitosa con el usuario y el token.
+    return {
+      status: "success",
+      response: { user: userToDelete }
+    };
+  }
+
 }
 
 // Exporta la clase UserService para que pueda ser utilizada en otros archivos.

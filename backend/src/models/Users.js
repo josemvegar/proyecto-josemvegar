@@ -107,5 +107,12 @@ userSchema.statics.findUserDuplicated = function (id, email = '', nick = '', pag
   }).exec();
 };
 
+userSchema.statics.findIdPerPage = function (id, page) {
+  return this.find({$and : [
+    {_id: id},
+    {page: page}
+  ]}).exec();
+};
+
 // Exporta el modelo de usuario para que pueda ser utilizado en otros archivos.
 module.exports = model("User", userSchema, "users");
