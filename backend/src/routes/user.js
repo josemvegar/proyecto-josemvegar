@@ -19,6 +19,9 @@ const editController = require("../controllers/user/update");
 // Importa el controlador de eliminar para manejar las solicitudes de eliminar usuarios.
 const deleteController = require("../controllers/user/delete");
 
+// Importa el controlador de listar  para manejar las solicitudes de listar usuarios.
+const listingController = require("../controllers/user/listing");
+
 // Importa el middleware de validación para verificar los datos de entrada.
 const validateUser = require('../middlewares/validateUser');
 
@@ -63,6 +66,24 @@ router.put("/update/:id?", auth(['role_admin', 'role_client']), editController.u
  * @param {Object} res - Objeto de respuesta HTTP.
  */
 router.delete("/delete/:id", auth(['role_admin']), deleteController._delete);
+
+/**
+ * Ruta para iniciar sesión.
+ * @name get/list
+ * @function
+ * @param {Object} req - Objeto de solicitud HTTP.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ */
+router.get("/list/:page?", auth(['role_admin']), listingController.list);
+
+/**
+ * Ruta para iniciar sesión.
+ * @name get/listOne
+ * @function
+ * @param {Object} req - Objeto de solicitud HTTP.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ */
+router.get("/one/:id?", auth(['role_admin', 'role_client', 'optional']), listingController.one);
 
 // Exporta el enrutador para que pueda ser utilizado en otros archivos.
 module.exports = router;

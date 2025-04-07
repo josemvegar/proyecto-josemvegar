@@ -20,6 +20,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('../helpers/jwt');
 const { use } = require('../routes/user');
 
+// Importa dotenv para cargar variables de entorno desde un archivo .env.
+const dotenv = require('dotenv');
+// Carga las variables de entorno definidas en el archivo .env.
+dotenv.config();
+
 class UserService {
   /**
    * Crea una respuesta de error estandarizada.
@@ -234,6 +239,43 @@ class UserService {
     return {
       status: "success",
       response: { user: userToDelete }
+    };
+  }
+
+  static async list(page, paginationPage= 1, id= null) {
+
+    const itemsPerPage = process.env.ITEMS_PER_PAGE;
+
+    if(!id){
+      //return this._createErrorResponse("error", 403, "No puedes eliminar tu propia cuenta.");
+
+      const userList = await User.findUserList(paginationPage, itemsPerPage, page);
+
+      const url = process.env.LIST_USER_URL;
+
+      return {
+        status: "success",
+        response: { page: paginationPage,
+          total_pages: userList.totalPages,
+          limit: userList.limit,
+          total_users: userList.totalDocs,
+          next: userList.nextPage !== null ? url+userList.nextPage : undefined,
+          prev: userList.prevPage !== null ? url+userList.prevPage : undefined,
+          users: userList.docs
+        }
+      };
+    }
+
+    // Busca al usuario en la base de datos.
+    const userExist = await User.find({$and: [{_id: id}, {page: page}]});
+    if (!userExist.length) {
+      return this._createErrorResponse("error", 404, "El id de usuario igresado no existe.");
+    }
+
+    // Devuelve una respuesta exitosa con el usuario y el token.
+    return {
+      status: "success",
+      response: { user: userExist }
     };
   }
 

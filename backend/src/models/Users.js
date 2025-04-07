@@ -10,6 +10,9 @@ const { Schema, model } = require("mongoose");
 // Importa bcrypt para encriptar y comparar contraseñas.
 const bcrypt = require("bcrypt");
 
+// Importa mongoose-paginate V2 para paginar las consultas largas.
+const paginate = require('mongoose-paginate-v2');
+
 /**
  * Esquema de usuario para MongoDB.
  * @name userSchema
@@ -37,6 +40,8 @@ const userSchema = new Schema({
   page: { type: String, required: true },
   created_at: { type: Date, default: Date.now() },
 });
+
+userSchema.plugin(paginate);
 
 /**
  * Método estático para buscar usuarios por email o nick.
@@ -113,6 +118,10 @@ userSchema.statics.findIdPerPage = function (id, page) {
     {page: page}
   ]}).exec();
 };
+
+userSchema.statics.findUserList = function (paginationPage, itemsPerPage, page) {
+  return this.paginate({page: page}, {page: paginationPage, limit: itemsPerPage, sort: { created_at: -1 }});
+}
 
 // Exporta el modelo de usuario para que pueda ser utilizado en otros archivos.
 module.exports = model("User", userSchema, "users");

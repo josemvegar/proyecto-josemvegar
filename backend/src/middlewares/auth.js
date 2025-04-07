@@ -28,8 +28,17 @@ const { SECRET } = require('../helpers/jwt');
  * router.get('/user-only', auth(), userController.action);
  */
 const auth = (roles = []) => (req, res, next) => {
+
+  if (!req.headers.token) {
+    console.log("Usuario no autenticado, continuando sin requerir autenticación.");
+    
+  }
+
   // Verifica si el token está presente en las cabeceras de la solicitud.
   if (!req.headers.token) {
+    if (roles.includes('optional')) {
+      return next();
+    }
     return res.status(403).send({
       status: 'error',
       message: 'La petición no tiene la cabecera de autenticación.',
