@@ -1,89 +1,117 @@
 /**
  * @file user.js
- * @description Define las rutas relacionadas con usuarios (registro, login, etc.).
+ * @description Define las rutas relacionadas con la gestión de usuarios (registro, autenticación, CRUD).
  * @module routes/user
  */
 
-// Importa el framework Express para crear rutas.
 const express = require("express");
-
-// Importa el controlador de login para manejar las solicitudes de inicio de sesión.
 const loginController = require("../controllers/account/login");
-
-// Importa el controlador de registro para manejar las solicitudes de registro de usuarios.
 const registerController = require("../controllers/account/register");
-
-// Importa el controlador de editar para manejar las solicitudes de edición de usuarios.
 const editController = require("../controllers/user/update");
-
-// Importa el controlador de eliminar para manejar las solicitudes de eliminar usuarios.
 const deleteController = require("../controllers/user/delete");
-
-// Importa el controlador de listar  para manejar las solicitudes de listar usuarios.
 const listingController = require("../controllers/user/listing");
-
-// Importa el middleware de validación para verificar los datos de entrada.
 const validateUser = require('../middlewares/validateUser');
-
-// Importa el middleware de autenticación para proteger rutas.
 const auth = require("../middlewares/auth");
-
-// Crea un enrutador de Express para definir las rutas.
 const router = express.Router();
 
 /**
- * Ruta para registrar un nuevo usuario.
- * @name post/register
- * @function
- * @param {Object} req - Objeto de solicitud HTTP.
- * @param {Object} res - Objeto de respuesta HTTP.
+ * @typedef {Object} UserRoute
+ * @property {function} register - Ruta para registro de nuevos usuarios
+ * @property {function} login - Ruta para autenticación de usuarios
+ * @property {function} update - Ruta para actualización de datos de usuario
+ * @property {function} delete - Ruta para eliminación de usuarios
+ * @property {function} list - Ruta para listado paginado de usuarios
+ * @property {function} one - Ruta para obtener un usuario específico
  */
-router.post("/register", validateUser.validateUser, registerController.register);
 
 /**
- * Ruta para iniciar sesión.
- * @name post/login
+ * Ruta para registro de nuevos usuarios
+ * @name POST /register
  * @function
- * @param {Object} req - Objeto de solicitud HTTP.
- * @param {Object} res - Objeto de respuesta HTTP.
+ * @memberof UserRoute
+ * @param {string} path - Ruta del endpoint
+ * @param {function} middleware - Validador de datos de usuario
+ * @param {function} controller - Controlador de registro
  */
-router.post("/login", validateUser.loginValidator, loginController.login);
+router.post(
+  "/register", 
+  validateUser.validateUser, 
+  registerController.register
+);
 
 /**
- * Ruta para iniciar sesión.
- * @name put/edit
+ * Ruta para autenticación de usuarios
+ * @name POST /login
  * @function
- * @param {Object} req - Objeto de solicitud HTTP.
- * @param {Object} res - Objeto de respuesta HTTP.
+ * @memberof UserRoute
+ * @param {string} path - Ruta del endpoint
+ * @param {function} middleware - Validador de credenciales
+ * @param {function} controller - Controlador de autenticación
  */
-router.put("/update/:id?", auth(['role_admin', 'role_client']), editController.update);
+router.post(
+  "/login", 
+  validateUser.loginValidator, 
+  loginController.login
+);
 
 /**
- * Ruta para iniciar sesión.
- * @name delete/delete
+ * Ruta para actualización de datos de usuario
+ * @name PUT /update/:id?
  * @function
- * @param {Object} req - Objeto de solicitud HTTP.
- * @param {Object} res - Objeto de respuesta HTTP.
+ * @memberof UserRoute
+ * @param {string} path - Ruta del endpoint con parámetro opcional de ID
+ * @param {function} middleware - Middleware de autenticación (admin o cliente)
+ * @param {function} controller - Controlador de actualización
  */
-router.delete("/delete/:id", auth(['role_admin']), deleteController._delete);
+router.put(
+  "/update/:id?", 
+  auth(['role_admin', 'role_client']), 
+  editController.update
+);
 
 /**
- * Ruta para iniciar sesión.
- * @name get/list
+ * Ruta para eliminación de usuarios
+ * @name DELETE /delete/:id
  * @function
- * @param {Object} req - Objeto de solicitud HTTP.
- * @param {Object} res - Objeto de respuesta HTTP.
+ * @memberof UserRoute
+ * @param {string} path - Ruta del endpoint con parámetro de ID
+ * @param {function} middleware - Middleware de autenticación (solo admin)
+ * @param {function} controller - Controlador de eliminación
  */
-router.get("/list/:page?", auth(['role_admin']), listingController.list);
+router.delete(
+  "/delete/:id", 
+  auth(['role_admin']), 
+  deleteController._delete
+);
 
 /**
- * Ruta para iniciar sesión.
- * @name get/listOne
+ * Ruta para listado paginado de usuarios
+ * @name GET /list/:page?
  * @function
- * @param {Object} req - Objeto de solicitud HTTP.
- * @param {Object} res - Objeto de respuesta HTTP.
+ * @memberof UserRoute
+ * @param {string} path - Ruta del endpoint con parámetro opcional de página
+ * @param {function} middleware - Middleware de autenticación (solo admin)
+ * @param {function} controller - Controlador de listado
  */
-router.get("/one/:id?", auth(['role_admin', 'role_client', 'optional']), listingController.one);
+router.get(
+  "/list/:page?", 
+  auth(['role_admin']), 
+  listingController.list
+);
 
-// Exporta el enrutador para que pueda ser utilizado en otros archivos.
+/**
+ * Ruta para obtener un usuario específico
+ * @name GET /one/:id?
+ * @function
+ * @memberof UserRoute
+ * @param {string} path - Ruta del endpoint con parámetro opcional de ID
+ * @param {function} middleware - Middleware de autenticación (admin, cliente o opcional)
+ * @param {function} controller - Controlador de obtención de usuario
+ */
+router.get(
+  "/one/:id?", 
+  auth(['role_admin', 'role_client', 'optional']), 
+  listingController.one
+);
+
 module.exports = router;

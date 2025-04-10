@@ -4,29 +4,23 @@
  * @module models/Users
  */
 
-// Importa Mongoose para definir el esquema y modelo de usuario.
 const { Schema, model } = require("mongoose");
-
-// Importa bcrypt para encriptar y comparar contraseñas.
 const bcrypt = require("bcrypt");
-
-// Importa mongoose-paginate V2 para paginar las consultas largas.
 const paginate = require('mongoose-paginate-v2');
 
 /**
- * Esquema de usuario para MongoDB.
- * @name userSchema
- * @type {Schema}
- * @property {string} name - Nombre del usuario (requerido).
- * @property {string} surname - Apellido del usuario (opcional).
- * @property {string} nick - Nickname del usuario (requerido).
- * @property {string} email - Correo electrónico del usuario (requerido).
- * @property {string} password - Contraseña del usuario (requerida, no se selecciona por defecto).
- * @property {string} role - Rol del usuario (por defecto: "role_user", no se selecciona por defecto).
- * @property {string} image - Nombre de la imagen del usuario (por defecto: "default.png").
- * @property {string} imagePath - Ruta de la imagen del usuario (por defecto: "/uploads/users/default.png").
- * @property {string} page - Página asociada al usuario (requerida).
- * @property {Date} created_at - Fecha de creación del usuario (por defecto: fecha actual).
+ * Esquema de usuario para MongoDB
+ * @typedef {Object} UserSchema
+ * @property {string} name - Nombre del usuario (requerido)
+ * @property {string} [surname] - Apellido del usuario (opcional)
+ * @property {string} nick - Apodo/Nickname del usuario (requerido)
+ * @property {string} email - Email del usuario (requerido)
+ * @property {string} password - Contraseña del usuario (requerido, no se selecciona por defecto)
+ * @property {string} [role=role_user] - Rol del usuario (por defecto: "role_user", no se selecciona por defecto)
+ * @property {string} [image=default.png] - Nombre de la imagen del usuario (por defecto: "default.png")
+ * @property {string} [imagePath=/uploads/users/default.png] - Ruta de la imagen del usuario (por defecto: "/uploads/users/default.png")
+ * @property {string} page - Página asociada al usuario (requerido)
+ * @property {Date} [created_at=Date.now()] - Fecha de creación (por defecto: fecha actual)
  */
 const userSchema = new Schema({
   name: { type: String, required: true },
@@ -41,20 +35,18 @@ const userSchema = new Schema({
   created_at: { type: Date, default: Date.now() },
 });
 
+// Aplicar plugin de paginación
 userSchema.plugin(paginate);
 
 /**
- * Método estático para buscar usuarios por email o nick.
- * @name findByEmailOrNick
- * @function
+ * Busca usuarios por email o nick en una página específica
  * @static
- * @param {string} email - Correo electrónico del usuario.
- * @param {string} nick - Nickname del usuario.
- * @param {string} page - Página asociada al usuario.
- * @returns {Query} - Consulta de Mongoose para buscar usuarios.
+ * @param {string} email - Email a buscar
+ * @param {string} nick - Nickname a buscar
+ * @param {string} page - Página asociada
+ * @returns {Query} Consulta de Mongoose para encontrar usuarios
  * @example
- * // Ejemplo de uso:
- * const users = await User.findByEmailOrNick("juan@example.com", "juan123", "miPagina");
+ * const usuarios = await User.findByEmailOrNick("correo@ejemplo.com", "nick123", "miPagina");
  */
 userSchema.statics.findByEmailOrNick = function (email, nick, page) {
   return this.find({
@@ -63,16 +55,13 @@ userSchema.statics.findByEmailOrNick = function (email, nick, page) {
 };
 
 /**
- * Método estático para buscar un usuario por email o nick, incluyendo la contraseña y el rol.
- * @name findUserToLogin
- * @function
+ * Busca un usuario para login (incluye contraseña y rol)
  * @static
- * @param {string} login - Correo electrónico o nickname del usuario.
- * @param {string} page - Página asociada al usuario.
- * @returns {Query} - Consulta de Mongoose para buscar usuarios.
+ * @param {string} login - Email o nickname del usuario
+ * @param {string} page - Página asociada
+ * @returns {Query} Consulta de Mongoose para encontrar usuarios
  * @example
- * // Ejemplo de uso:
- * const user = await User.findUserToLogin("juan@example.com", "miPagina");
+ * const usuario = await User.findUserToLogin("correo@ejemplo.com", "miPagina");
  */
 userSchema.statics.findUserToLogin = function (login, page) {
   return this.find({
@@ -84,20 +73,26 @@ userSchema.statics.findUserToLogin = function (login, page) {
 };
 
 /**
- * Método de instancia para comparar una contraseña con la contraseña encriptada del usuario.
- * @name comparePassword
- * @function
- * @param {string} password - Contraseña a comparar.
- * @returns {boolean} - `true` si la contraseña coincide, `false` en caso contrario.
+ * Compara una contraseña con la almacenada en el usuario
+ * @method
+ * @param {string} password - Contraseña a comparar
+ * @returns {boolean} True si coinciden, false si no
  * @example
- * // Ejemplo de uso:
- * const user = await User.findById("12345");
- * const isMatch = user.comparePassword("contraseña");
+ * const coincide = usuario.comparePassword("miContraseña");
  */
 userSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
+/**
+ * Busca usuarios duplicados (mismo email o nick en la misma página)
+ * @static
+ * @param {string} id - ID del usuario a excluir de la búsqueda
+ * @param {string} [email] - Email a buscar
+ * @param {string} [nick] - Nickname a buscar
+ * @param {string} page - Página asociada
+ * @returns {Query} Consulta de Mongoose para encontrar usuarios duplicados
+ */
 userSchema.statics.findUserDuplicated = function (id, email = '', nick = '', page) {
   const orConditions = [];
   if (email) orConditions.push({ email });
@@ -112,6 +107,13 @@ userSchema.statics.findUserDuplicated = function (id, email = '', nick = '', pag
   }).exec();
 };
 
+/**
+ * Busca un usuario por ID en una página específica
+ * @static
+ * @param {string} id - ID del usuario
+ * @param {string} page - Página asociada
+ * @returns {Query} Consulta de Mongoose para encontrar el usuario
+ */
 userSchema.statics.findIdPerPage = function (id, page) {
   return this.find({$and : [
     {_id: id},
@@ -119,9 +121,17 @@ userSchema.statics.findIdPerPage = function (id, page) {
   ]}).exec();
 };
 
+/**
+ * Obtiene lista paginada de usuarios de una página específica
+ * @static
+ * @param {number} paginationPage - Número de página a mostrar
+ * @param {number} itemsPerPage - Cantidad de items por página
+ * @param {string} page - Página asociada
+ * @returns {Promise<Object>} Resultado paginado
+ */
 userSchema.statics.findUserList = function (paginationPage, itemsPerPage, page) {
   return this.paginate({page: page}, {page: paginationPage, limit: itemsPerPage, sort: { created_at: -1 }});
 }
 
-// Exporta el modelo de usuario para que pueda ser utilizado en otros archivos.
+// Exportar el modelo de usuario
 module.exports = model("User", userSchema, "users");
